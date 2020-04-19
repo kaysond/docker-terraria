@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+#update user
+PUID=${PUID:-911}
+PGID=${PGID:-911}
+
+groupmod -o -g "$PGID" terraria
+usermod -o -u "$PUID" terraria
+echo "UID: $PUID"
+echo "GID: $PGID"
+# permissions
+chmod -R a+X /root
+chown -R terraria:terraria /root/.local/share/Terraria
+chown -R terraria \
+	/app/terraria/bin
+chmod a+x /app/terraria/bin/TerrariaServer.bin.x86_64
