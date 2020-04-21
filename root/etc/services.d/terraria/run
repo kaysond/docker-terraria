@@ -1,3 +1,0 @@
-#!/bin/bash
-cd /app/terraria/bin || exit
-exec s6-setuidgid terraria ./TerrariaServer.bin.x86_64 -config /config/serverconfig.txt
