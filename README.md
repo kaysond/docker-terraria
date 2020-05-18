@@ -31,3 +31,12 @@ services:
 ```
 
 If you want to use the interactive console, you can re-attach to the container via `docker attach terraria`.
+
+### Sample serverconfig.txt
+
+```
+world=/world/World.wld # Do not change this unless you have a world file that has already been created
+autocreate=2 # Auto create a medium size world if /world/World.wld doesn't exist
+worldpath=/world # Auto create will save the world file to <worldpath>/World.wld
+worldname=Terraria
+```
