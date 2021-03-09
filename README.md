@@ -39,4 +39,5 @@ world=/world/World.wld # Do not change this unless you have a world file that ha
 autocreate=2 # Auto create a medium size world if /world/World.wld doesn't exist
 worldpath=/world # Auto create will save the world file to <worldpath>/World.wld
 worldname=Terraria
+difficulty=0 # Sets the difficulty of the map ; 0=Normal ; 1=Expert ; 2=Master ; 3=Jorney
 ```
