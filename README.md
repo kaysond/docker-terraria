@@ -1,5 +1,5 @@
 # Dockerized Vanilla Terraria Server
-
+[![Build - Latest](https://github.com/kaysond/docker-terraria/actions/workflows/build-latest.yml/badge.svg)](https://github.com/kaysond/docker-terraria/actions/workflows/build-latest.yml)
 ## Instructions
 Set up two folders, one should be mounted to `/world` and contain your world files. The other should be mounted to `/config` and contain a single file: `serverconfig.txt`. This file is your server config file as described [here](https://terraria.gamepedia.com/Guide:Setting_up_a_Terraria_server#Making_a_configuration_file). In your config file, make sure `worldpath=/world` and `world=/world/<worldname>.wld`. If you do not already have a world, you can use the `autocreate` option to make the server create the world. If you do not have a serverconfig.txt file, the container will create one for you that autocreates a medium world called "Terraria."
 
