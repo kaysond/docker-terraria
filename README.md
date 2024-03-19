@@ -11,8 +11,6 @@ Replacing the items in `<>`. For paths, I use `/var/lib/terraria/world` and `/va
 You can also use the following `docker-compose.yml` file, and run with `docker-compose up -d`.
 
 ```yaml
-version: '2.0'
-
 services:
   terraria:
     container_name: terraria
