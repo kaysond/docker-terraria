@@ -8,7 +8,7 @@ For security, you should set up a dedicated user and group for Terraria. Grant p
 Run the container via the CLI with: `docker run -itd --name=terraria -e PUID=<PROCESS UID> -e PGID=<PROCESS GID> -p 7777:7777 -v <PATH TO WORLDS>:/world -v <PATH TO CONFIG>:/config kaysond/docker-terraria`
 Replacing the items in `<>`. For paths, I use `/var/lib/terraria/world` and `/var/lib/terraria/config`.
 
-You can also use the following `docker-compose.yml` file, and run with `docker-compose up -d`.
+You can also use the following `docker-compose.yml` file, and run with `docker compose up -d`.
 
 ```yaml
 services:
@@ -18,7 +18,7 @@ services:
     environment:
       PUID: "<PROCESS UID>"
       PGID: "<PROCESS GID>"
-    restart: always
+    restart: unless-stopped
     stdin_open: true
     tty: true
     ports:
