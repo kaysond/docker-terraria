@@ -1,6 +1,6 @@
 FROM quay.io/justcontainers/base
 
-ARG version="1449"
+ARG version="1453"
 LABEL maintainer="github@aram.nubmail.ca"
 
 ADD "https://terraria.org/api/download/pc-dedicated-server/terraria-server-${version}.zip" /tmp/terraria.zip
