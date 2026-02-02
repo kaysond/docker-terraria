@@ -1,35 +1,22 @@
-FROM quay.io/justcontainers/base
+FROM debian:trixie-slim
 
 ARG version="1453"
 LABEL maintainer="github@aram.nubmail.ca"
 
 ADD "https://terraria.org/api/download/pc-dedicated-server/terraria-server-${version}.zip" /tmp/terraria.zip
 
+RUN apt-get update && apt-get install -y --no-install-recommends unzip
+
+WORKDIR /app/terraria/bin
+
 RUN \
- echo "**** install terraria ****" && \
- apt-get update && \
- apt-get install -y unzip && \
- mkdir -p /root/.local/share/Terraria && \
- echo "{}" > /root/.local/share/Terraria/favorites.json && \
- mkdir -p /app/terraria/bin && \
- unzip /tmp/terraria.zip ${version}'/Linux/*' -d /tmp/terraria && \
- mv /tmp/terraria/${version}/Linux/* /app/terraria/bin && \
- echo "**** creating user ****" && \
- mkdir /config && \
- useradd -u 911 -U -d /config -s /bin/false terraria && \
- usermod -G users terraria && \
- echo "**** cleanup ****" && \
- apt-get clean && \
- rm -rf \
-	/tmp/* \
-	/var/tmp/*
+ unzip -j -d . /tmp/terraria.zip ${version}'/Linux/*' && \
+ chmod +x ./TerrariaServer.bin.x86_64 ./TerrariaServer && \
+ rm /tmp/terraria.zip
 
-# add local files
-COPY root/ /
-
-# ports and volumes
+# TerrariaServer writes to paths under $HOME/.local/
+ENV HOME=/world
 EXPOSE 7777
 VOLUME ["/world","/config"]
 
-ENTRYPOINT ["/init"]
-CMD ["/usr/bin/with-contenv", "s6-setuidgid", "terraria", "/app/terraria/bin/TerrariaServer.bin.x86_64", "-config", "/config/serverconfig.txt"]
+ENTRYPOINT ["/app/terraria/bin/TerrariaServer", "-config", "/config/serverconfig.txt"]
