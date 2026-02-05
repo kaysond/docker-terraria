@@ -4,7 +4,13 @@ on:
   push:
     branches:
       - 'master'
-
+    paths:
+      - Dockerfile
+  workflow_run:
+    workflows: ["Auto-update Terraria version"]
+    types:
+      - completed
+      
 jobs:
   docker:
     runs-on: ubuntu-latest
