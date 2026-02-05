@@ -1,0 +1,59 @@
+name: Check for dedicated server updates
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs every day at 23:00 UTC
+    - cron: '0 23 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install jq
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+
+      - id: get_version
+        name: Fetch latest server filename and parse version
+        run: |
+          set -euo pipefail
+          FILENAME="$(curl -s -A 'Github Actions (kaysond/docker-terraria)' https://terraria.org/api/get/dedicated-servers-names | jq -r '.[0]')"
+          echo "Got filename: $FILENAME"
+          VERSION="$(echo "$FILENAME" | grep -oE '[0-9]+' | head -n1)"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Get current Dockerfile version
+        id: check_current
+        run: |
+          set -eu
+          CURRENT_VERSION="$(grep -oP 'ARG version="\K[0-9]+' Dockerfile)"
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update Dockerfile if needed
+        if: steps.get_version.outputs.version != steps.check_current.outputs.current_version
+        run: |
+          set -eu
+          VERSION="${{ steps.get_version.outputs.version }}"
+          sed -i 's/ARG version="[0-9]\+"/ARG version="'"$VERSION"'"/' Dockerfile
+
+      - name: Create Pull Request
+        if: steps.get_version.outputs.version != steps.check_current.outputs.current_version
+        uses: peter-evans/create-pull-request@v8.1.0
+        with:
+          title: "Update Terraria server version to ${{ steps.get_version.outputs.version }}"
+          body: |
+            Automated update of `ARG version` in `Dockerfile` to `${{ steps.get_version.outputs.version }}`.
+          commit-message: "chore: update Terraria server version to ${{ steps.get_version.outputs.version }}"
+          branch: "update-version-${{ steps.get_version.outputs.version }}"
+          delete-branch: true
