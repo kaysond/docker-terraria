@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    tags:
+      - "v*"
   workflow_dispatch:
 
 jobs:
@@ -15,18 +17,44 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: docker/login-action@v3
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build image
+      - name: Extract version from Dockerfile
+        id: version
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/terraria:latest .
+          VERSION=$(grep -oP 'ARG version="\K[0-9]+' Dockerfile)
+          if [ -z "$VERSION" ]; then
+            echo "ERROR: Could not extract version from Dockerfile"
+            exit 1
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Push latest
+      - name: Build versioned image
+        run: |
+          docker build \
+            --build-arg version=${{ steps.version.outputs.version }} \
+            -t ghcr.io/${{ github.repository_owner }}/terraria:${{ steps.version.outputs.version }} .
+
+      - name: Push versioned tag
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/terraria:${{ steps.version.outputs.version }}
+
+      - name: Tag as latest (only on master)
+        if: startsWith(github.ref, 'refs/heads/master')
+        run: |
+          docker tag \
+            ghcr.io/${{ github.repository_owner }}/terraria:${{ steps.version.outputs.version }} \
+            ghcr.io/${{ github.repository_owner }}/terraria:latest
+
+      - name: Push latest (only on master)
+        if: startsWith(github.ref, 'refs/heads/master')
         run: |
           docker push ghcr.io/${{ github.repository_owner }}/terraria:latest
