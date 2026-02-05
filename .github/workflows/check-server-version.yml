@@ -1,0 +1,58 @@
+name: Auto-update Terraria version
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read current version from Dockerfile
+        id: current
+        run: |
+          CUR=$(grep -oP 'ARG version="\K[0-9]+' Dockerfile)
+          echo "current=$CUR" >> $GITHUB_OUTPUT
+
+      - name: Find newest available version
+        id: newest
+        run: |
+          CUR=${{ steps.current.outputs.current }}
+          NEXT=$((CUR + 1))
+          LAST_FOUND=$CUR
+
+          while true; do
+            URL="https://terraria.org/api/download/pc-dedicated-server/terraria-server-${NEXT}.zip"
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+
+            if [ "$STATUS" = "200" ]; then
+              LAST_FOUND=$NEXT
+              NEXT=$((NEXT + 1))
+            else
+              break
+            fi
+          done
+
+          echo "newest=$LAST_FOUND" >> $GITHUB_OUTPUT
+
+      - name: Stop if no new version
+        if: steps.newest.outputs.newest == steps.current.outputs.current
+        run: |
+          echo "No new Terraria version available."
+
+      - name: Update Dockerfile
+        if: steps.newest.outputs.newest != steps.current.outputs.current
+        run: |
+          sed -i 's/ARG version="[0-9]\+"/ARG version="${{ steps.newest.outputs.newest }}"/' Dockerfile
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git commit -am "Update Terraria server to version ${{ steps.newest.outputs.newest }}"
+          git push
