@@ -4,8 +4,12 @@ on:
   push:
     branches:
       - master
-    tags:
-      - "v*"
+    paths:
+      - Dockerfile
+  workflow_run: 
+    workflows: ["Auto-update Terraria version"] 
+    types: 
+      - completed
   workflow_dispatch:
 
 jobs:
@@ -13,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
