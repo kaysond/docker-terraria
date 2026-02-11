@@ -1,6 +1,6 @@
 FROM debian:trixie-slim
 
-ARG version="1454"
+ARG version="1455"
 LABEL maintainer="github@aram.nubmail.ca"
 
 ADD "https://terraria.org/api/download/pc-dedicated-server/terraria-server-${version}.zip" /tmp/terraria.zip
